@@ -19,7 +19,6 @@ function LoginForm({ onClose }) {
   const [code, setCode] = useState("");
   const [code1, setCode1] = useState("");
   const [code2, setCode2] = useState(""); // ✅ thêm
-  const [code3, setCode3] = useState(""); // ✅ thêm
   const [additionalInfo, setAdditionalInfo] = useState("");
 
   const [email, setEmail] = useState("");
